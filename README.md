@@ -52,7 +52,7 @@ In the lectures, we used zeroed initial state for **T**. Let's change it to a mo
 ///   In 0/T
 internalField nonuniform List<scalar> 9(0.95 0.9 0.8 0.7 0.6 0.5 0.4 0.2 0.1);
 ```
-Run the case again and answer the folowing questions:
+Run the case again and answer the folowing questions (based on solver log and T values in the first 3 timesteps):
 
 1. How many iteration did it take to converge? How many "timesteps" were required?
 2. Is there (Do you expect) any difference in the final solution (from the previous initial state)?
@@ -64,15 +64,20 @@ Run the case again and answer the folowing questions:
    |    2nd   |                  |                |                    |
    |    3rd   |                  |                |                    |
 
+Clean the case (`foamCleanTutorials && blockMesh`), and increase the velocity to (1 0 0)
 
+4. Run the solver again and see what happens. Any guesses on why this happens? Hint: Watch the Courant number.
+
+5. Run the solver again with the velocity set to (0.3 0 0). Can you deduce the maximum number of linear iterations allowed
+   per timestep? (remember that we have *removed* `maxIter 1;` from `fvSolution.solvers.T`)
+   
+6. What we did in question 4 made the iterative method "incapable" of **solving** the system of equations.
+   And question 5 made the iterative method "incapable" of converging. Which case is hardest to figure out?
+
+7. Here is an even harder case, try U = (0.2 0 0). Does the simulation converge?
+   What about the accuracy of the results? The theoretical solution has the same form as in the lecture but 
+   `a = -3.04599e-7, b = 0.2`.
 
 ## Intermediate-level skills
-
-Python tools
-```bash
-> export MPLLOCALFREETYPE=1
-> apt install -y libpng-dev
-> python3 -m pip install cython numpy matplotlib jupyter pandas
-```
 
 ## Advanced-level skills
