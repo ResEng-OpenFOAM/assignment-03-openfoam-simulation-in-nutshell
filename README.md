@@ -78,6 +78,119 @@ Clean the case (`foamCleanTutorials && blockMesh`), and increase the velocity to
    What about the accuracy of the results? The theoretical solution has the same form as in the lecture but 
    `a = -3.04599e-7, b = 0.2`.
 
+> I think I made the point here, convergence doesn't mean the result are accurate.
+> Don't forget to get the velocity back value to (0.03 0 0). 
+
+### Iterative solvers and preconditioners
+
+Let's now experiment with more linear solvers. To figure out what kind of iterative solvers are available for the
+**T** field, we can replace `fvSolution.solvers.T.solver` with "res-eng" (for example, we know there is no iterative 
+solver named res-eng), and then run `scalarTransportFoam`.
+
+This will cause OpenFOAM solvers to display a list of available iterative solvers for the field.
+```bash
+--> FOAM FATAL IO ERROR: 
+Unknown asymmetric matrix solver res-eng
+Valid asymmetric matrix solvers are :
+
+12
+(
+BICCG
+BiCG
+BiCGStab
+FPEAMG
+GAMG
+GMRES
+MPEAMG
+PBiCG
+RREAMG
+amgSolver
+deflation
+smoothSolver
+)
+```
+> Different OpenFOAM forks will offer a different set of iterative solvers.
+
+The error lists all available solvers for asymmetric matrices (which is the type of our matrix).
+
+1. Instead of "res-eng" as the iterative solver, try **PBiCG** (short for Preconditioned Bi-conjugate gradient).
+   Run `scalarTransportFoam` and see what happens (read through the error).
+
+> Hint: PBiCG (and many others) require a "preconditioner" which is an operation applied to the matrix before 
+> solving the system of equations to improve its condition number ( get
+> <img src="https://latex.codecogs.com/gif.latex?cond(M)=|M^{-1}|.|M|" title="cond(M)=|M^{-1}|.|M|" />
+> near the value 1, where **M** is the matrix in question)
+
+2. You can now include `preconditioner    something;` in `fvSolution.solvers.T` dictionary to get a list 
+   of available pre-conditioners.
+
+3. Pick, `preconditioner   diagonal;` (The simplest one) and try the following iterative solvers 
+   (All variants of the Krylov-space CG solver) and complete the table:
+
+   | Iterative solver | Number of Iterations to converge | Final Residual |
+   |------------------|----------------------------------|----------------|
+   |       PBiCG      |                      | |
+   |     BiCGStab     |                      | |
+
+> If there is an interative solver you want to learn more about, the source code can give you
+> a fairly sufficient amount of information (no C++ knowledge is required, just read the description)
+> : `find $FOAM_SRC -iname "PBicG*H"` for example (the H is there to get only the "header files").
+
+4. How these perform when compared to the Gauss Seidel Method?
+5. Reservoir Engineers use more the GMRES (Generalized Minimal RESidual method, another Krylov-space method) 
+   in their simulations.
+   So, let's try it out. Set `fvSolution.solvers.T.solver` to GMRES, and run `scalarTransportFoam`.
+   The iterative solver requires that you specify the Krylov-space dimensions 
+   (`nDirections  5;` is what I usually do: we know 9 dimensions would solve the problem 
+   in a single **iteration**. But, do try different values for `nDirections` - between 1 and 9 -).
+
+6. Another family of iterative solvers (other than Krylov-Space ones) is the multi-grid family. Those
+   are the iterative solvers that solve the matrix on different levels of mesh density (starting from 
+   the most coarse mesh and building up to reach the finest one). An example of such solvers is **GAMG**
+   (Geometric-Algebraic Multi-Grid) which can apply the agglomeration on mesh cells directly (the Geometric
+   approach) or on matrix cofficients only (the Algebraic approach).
+   Set `fvSolution.solvers.T.solver` to `GAMG` and `scalarTransportFoam`. You know the drill.
+   Just any keywords that the solver says are missing, with a dummy value ("something" for example) to get
+   a list of available options each time. It's recommended to pick the following configuration though:
+   
+   - Agglomeration type: `algebraicPair`
+   - Number of cells in coarsest mesh level: sqrt(nCells) is usually good. In this case, sqrt(9) = 3.
+     But do try 4 and 2 afterwards.
+   - Merge agglomeration Levels should be set to 1 (enabled).
+   - Keep the smoother to GaussSeidel.
+   
+> Note that we tried a whole bunch of iterative solvers without touching the smoother keyword.
+> Some of these methods indeed required the presence of this keyword, and some of them didn't use it at all.
+> But OpenFOAM didn't complain about it.
+   
+7. One last thing to do is to try out different preconditioners for this matrix. Set `fvSolution.solvers.T.solver`
+   to **PBiCG** and change the preconditioner each time:
+   
+   | Preconditioner | Number of Iterations to converge | Final Residual |
+   |------------------|----------------------------------|----------------|
+   |      diagonal      |                      | |
+   |      DILU     |                      | |
+   |      SymGaussSeidel     |                      | |
+  
 ## Intermediate-level skills
+
+I think The basic-level section made it clear that the best configuration to use is the **PBiCG** as the solver and
+**DILU** as its preconditioner. So, we'll continue with this configuration.
+
+### Mesh Density
+
+What if we increase cells number in our domain? from 9 to 20, 300, 10000. 
+
+> Cell Size issues usually arise in transient simulations. As this is a steady-state one, we
+> are relatively safe. We can go for 100000 cells without problems (capturing a change of the order 1e-5 in T value
+> between cell centers).
+
+The procedure to change the cell number is as follows:
+
+- In `constant/blockMeshDict.blocks`, we change the 9 in `hex (0 1 2 3 4 5 6 7) (9 1 1) simpleGrading (1 1 1)`
+  to whatever we like.
+- Re-Build the mesh and check its quality (with `blockMesh && checkMesh`) 
+
+### Using Jupyter Notebooks to manage case reports
 
 ## Advanced-level skills
