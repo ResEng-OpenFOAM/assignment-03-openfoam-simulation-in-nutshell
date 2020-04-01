@@ -193,4 +193,36 @@ The procedure to change the cell number is as follows:
 
 ### Using Jupyter Notebooks to manage case reports
 
+> You have to add `-L 8888:localhost:8888` to the 
+> SSH command you access the server with for this to work i this section.
+> `ssh -xC -i ~/.ssh/remotesshkey.pem -L 8888:localhost:8888 linux1@xxx.xxx.xxx.xxx`
+
+
+It's probably best to keep a Jupyter Notebook for the case as an Interface. 
+Instead of going through each file in the case - trying to figure out what's going on -
+you can document important operations easilly within a notebook.
+
+Our case repo has a tag for a Jupyter Notebook built with PyFoam. It does require some Python knowledge
+to make sense of the things in there, but I believe you can pick Python as you go through the notebook.
+
+Inside the docker container, run the following command (everything is already set up so you can run this
+easily):
+
+```bash
+> git checkout IntroNotebook
+> jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root
+```
+
+Then, in your local browser, go to the link displayed in the terminal
+(will start with http://127.0.0.1:8888/?token=....).
+
+> This works because by 127.0.0.1, we mean the localhost (from your point of view,
+> this points to your machine; and from the container's point of view, it points to the container's
+> localhost). The container's 8888 port is forwarded to the remote server 8888 port 
+> (if you're using the recommended setup), which is also forwarded to your local 8888 port
+> with the SSH command above.
+
+In Jupyter home page, click on the `intro.ipynb` file to bring up the notebook.
+Read through it, and execute code cells one by one with Ctrl+Enter.
+
 ## Advanced-level skills
