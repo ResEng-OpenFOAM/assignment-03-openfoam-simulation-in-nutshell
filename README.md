@@ -234,7 +234,7 @@ Before starting, checkout the **IntroNotebook** stage, and perform the following
 
 - Change `endTime` from 40 to 5.
 - Change the linear solver for **T** equation to `PBiCG` with `DILU` as its preconditioner.
-- Change the solver's absolute tolerance to `1e-10`
+- Change the solver's absolute tolerance to `1e-10` and remove the `maxIter` entry.
 - Change the diffusivity coefficient in `constant/transportProperties` from 0.01 to **0.1**.
 - Make sure U = (0.03 0 0) is set as initial conditions for the velocity.
 
@@ -299,3 +299,29 @@ You're asked to change the mesh density, rerun the simulation, and compare your 
 > May be a factor of 0.1 was a bit of a stretch in this case, but you get the point.
 
 ### The problematic div(phi, T) term.
+
+Now get back to the 9-cells case, and set U = (0 0 0) to fallback to a pure diffusion case; where 
+the theoretical profile of **T** is linear: `T(x) = 1-10x/9`
+
+1. Run the solver. How the errors look in this case?
+2. From the previous question, we conclude the divergence term is introducing some
+   instablities. So, set U = (0.03 0 0) again and let's change the `div` scheme for that specific 
+   term a couple of times and see what happens.
+   Which of the following schemes is the **least** accurate in this case:
+     - `Gauss linear`
+     - `Gauss upwind`
+     - `Gauss vanLeer` (A TVD scheme)
+
+> Replace "linear" with "anything" in `Gauss linear;` and run the solver 
+> to get a list of available schemes.
+
+`upwind` is known for its "stability", which causes the loss of accuracy: It's a tradeoff! That's why It's
+always recommended to start with `upwind` for div. terms, then improve on things one the case is running file.
+Let's now challenge its stability:
+
+The most "correct" way to evaluate a solver's stability from a practical point of view
+is to get back to GaussSeidel with 40 iterations and `maxIter 1` settings;
+and then plot T values over the domain at each timestep (easy enough with ParaView).
+
+
+
