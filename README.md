@@ -226,3 +226,76 @@ In Jupyter home page, click on the `intro.ipynb` file to bring up the notebook.
 Read through it, and execute code cells one by one with Ctrl+Enter.
 
 ## Advanced-level skills
+
+From the manual solution lecture, we can deduce our results are **not** that accurate. This section
+tries to investigate deeper on why the results have such moderate errors.
+
+Before starting, checkout the **IntroNotebook** stage, and perform the following changes:
+
+- Change `endTime` from 40 to 5.
+- Change the linear solver for **T** equation to `PBiCG` with `DILU` as its preconditioner.
+- Change the solver's absolute tolerance to `1e-10`
+- Change the diffusivity coefficient in `constant/transportProperties` from 0.01 to **0.1**.
+- Make sure U = (0.03 0 0) is set as initial conditions for the velocity.
+
+When it comes to simulation accuracy, mesh size generally plays a decent role. Let's inspect what refining 
+the mesh may bring to the table:
+
+### Finer Meshes.
+
+This repository contains a folder **finerMeshTheory** which provides the following field files to make
+it easier to compare OpenFOAM results to the theoretical ones:
+
+- `T.theory.9cells`: Theoretical T field at cell centers mapped to 9 cells.
+- `T.theory.20cells`: Theoretical T field at cell centers mapped to 20 cells.
+- `T.theory.50cells`: Theoretical T field at cell centers mapped to 50 cells.
+- `T.theory.200cells`: Theoretical T field at cell centers mapped to 200 cells.
+
+Note the domain length is **always** 0.9m, we just increase the number of cells within this domain each time.
+
+In Foam-Extend, and other older OpenFOAM versions, we rely on the `foamCalc` utility to perform simple
+calculations on fields without going through the trouble of "ParaViewing things".
+
+> Newer versions of Mainline OpenFOAM have replaced this utility with `postProcess`, which has a similar
+> commandline interface
+
+For this particular case, we are interested in the difference between two fields (the one the simulation generates, and
+the theoretical one) at `endTime`. For this task, you can run the command:
+
+```bash
+> foamCalc addSubtract T subtract -field T.theory.9cells -time 5
+```
+To calculate the difference between your simulated field and the provided theoretical one at time 5.
+This "difference" is written as a field in 5 directory, and named as "T_subtract_T.theory.9cells".
+
+You're asked to change the mesh density, rerun the simulation, and compare your results to theoretical fields:
+
+
+   | Cell Count  | Order of magnitude of the difference |
+   |-------------|--------------------------------------|
+   |      9      |          1e-4            |
+   |      20     |                          |
+   |      50     |                          |
+   |      200    |                          |
+   
+1. Do you think refining the mesh helps?
+2. Do you think refining the mesh *further* can help? Remember we're splitting a 0.9m-long to more than 200 cells
+   where the velocity is 0.03 m/s (fluids run through the domain in half a second).
+3. How about refining regions of the mesh (eg. near boundaries) and ignoring others? This repo's directory: 
+   **gradedMesh** provides the required `blockMeshDict` to generate a "graded" mesh. Just copy it to `constant/polyMesh`
+   and run `blockMesh`:
+   
+   ![Graded mesh](gradedMesh/gradedMesh.png)
+   
+   Basically, instead of specifying only one mesh block, we split our domain into two domains; where we multiply
+   cellSize in one block by 10 and by 0.1 in the other (following the same x-direction) to get smaller 
+   cell size near boundaries and larger ones twards the center:
+   
+   ![Block Description for the graded Mesh](gradedMesh/blockMesh.png)
+   
+   We have used the mesh with 20 cells as a baseline; so rerun the simulation with the graded mesh and compare
+   the order of errors (a file holding theoretical **T** at the new mesh cell centers is provided).
+
+> May be a factor of 0.1 was a bit of a stretch in this case, but you get the point.
+
+### The problematic div(phi, T) term.
