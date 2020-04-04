@@ -1,0 +1,73 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | foam-extend: Open Source CFD                    |
+|  \\    /   O peration     | Version:     4.0                                |
+|   \\  /    A nd           | Web:         http://www.foam-extend.org         |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//convertToMeters 0.1;
+
+vertices
+(
+  ( 0   0   0   )     
+  ( 0.45 0   0   )      
+  ( 0.45 0.1 0   )     
+  ( 0   0.1 0   )     
+  ( 0   0   0.1 )      
+  ( 0.45 0   0.1 )
+  ( 0.45 0.1 0.1 )     
+  ( 0   0.1 0.1 )
+  ( 0.9 0   0   )      
+  ( 0.9 0.1 0   )     
+  ( 0.9 0   0.1 )
+  ( 0.9 0.1 0.1 )     
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) (10 1 1) simpleGrading (10 1 1)
+    hex (1 8 9 2 5 10 11 6) (10 1 1) simpleGrading (0.1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+  inlet  // Patch name
+  {
+    type patch ;            // Generic patch type
+    faces ( ( 0 4 7 3 ) ) ; // Inlet has one face
+  }
+  outlet
+  {
+    type patch ;
+    faces ( ( 8 10 11 9 ) ) ;
+  }
+  noFlow
+  {
+    type empty ;             // No flow in perpendicular direc. 
+    faces
+    (
+        ( 3 7 6 2 ) ( 1 5 4 0 ) ( 0 3 2 1 ) ( 4 5 6 7 ) 
+        ( 1 8 9 2 ) ( 2 9 11 6 ) (6 11 10 5) (5 10 8 1)
+    );
+  }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //
