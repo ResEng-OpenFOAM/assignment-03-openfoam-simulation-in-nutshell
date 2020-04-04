@@ -243,7 +243,7 @@ the mesh may bring to the table:
 
 ### Finer Meshes.
 
-This repository contains a folder **finerMeshTheory** which provides the following field files to make
+This repository contains a folder **finerMesh** which provides the following field files to make
 it easier to compare OpenFOAM results to the theoretical ones:
 
 - `T.theory.9cells`: Theoretical T field at cell centers mapped to 9 cells.
