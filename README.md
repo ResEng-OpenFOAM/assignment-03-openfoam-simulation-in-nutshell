@@ -321,7 +321,47 @@ Let's now challenge its stability:
 
 The most "correct" way to evaluate a solver's stability from a practical point of view
 is to get back to GaussSeidel with 40 iterations and `maxIter 1` settings;
-and then plot T values over the domain at each timestep (easy enough with ParaView).
+and then plot **T** values over the domain at each timestep (easy enough with ParaView).
 
+For this task; we can write a shell script to automate things a bit:
 
+> Please go back to a clean state of the `IntroNotebook` tag: `git reset --hard`
 
+```bash
+#!/bin/bash
+# File: compareLinearAndUpwind.sh
+
+# Make sure the div scheme is linear
+sed -i 's/div(phi,T).*;/div(phi,T)  Gauss linear;/' system/fvSchemes
+scalarTransportFoam
+for item in `ls -v */T`;
+do
+   cp $item "$item.linear";
+   sed -i 's/object.*;/object T.linear;/' $item.linear;
+done
+
+# Do the same for the upwind case
+
+sed -i 's/div(phi,T).*;/div(phi,T)  Gauss upwind;/' system/fvSchemes
+scalarTransportFoam
+for item in `ls -v */T`;
+do
+   cp $item "$item.upwind";
+   sed -i 's/object.*;/object T.upwind;/' $item.upwind;
+done
+```
+
+Make the file executable and execute it:
+```bash
+> chmod +x compareLinearAndUpwind.sh && ./compareLinearAndUpwind.sh
+```
+
+The following results are obtained by setting K = 0.01 and U = (0.3 0 0) with cell count = 20,
+which are then compared to theoretical solution (sampled only at cell centers):
+
+![Upwind scheme stability](divResulats/U0.3.gif)
+
+Increasing U to 0.5m/s and making the outlet a free boundary (zeroGradient type on T field); we 
+get the following results (compare the stability of linear vs. upwind):
+
+![Upwind scheme is more stable](divResults/U0.5.gif)
