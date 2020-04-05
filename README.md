@@ -359,7 +359,7 @@ Make the file executable and execute it:
 The following results are obtained by setting K = 0.01 and U = (0.3 0 0) with cell count = 20,
 which are then compared to theoretical solution (sampled only at cell centers):
 
-![Upwind scheme stability](divResulats/U0.3.gif)
+![Upwind scheme stability](divResults/U0.3.gif)
 
 Increasing U to 0.5m/s and making the outlet a free boundary (zeroGradient type on T field); we 
 get the following results (compare the stability of linear vs. upwind):
