@@ -278,9 +278,10 @@ You're asked to change the mesh density, rerun the simulation, and compare your 
    
    ![Graded mesh](gradedMesh/gradedMesh.png)
    
-   Basically, instead of specifying only one mesh block, we split our domain into two domains; where we multiply
-   cellSize in one block by 10 and by 0.1 in the other (following the same x-direction) to get smaller 
-   cell size near boundaries and larger ones twards the center:
+   Basically, instead of specifying only one mesh block, we split our domain into two blocks; where we 
+   specify the ratio between the ending cellSize to the starting cellSize (in the block, following the x-direction)
+   to be 10 in one block and to be 0.1 in the other (following the same x-direction) to get smaller 
+   cell size near boundaries and larger ones towards the center:
    
    ![Block Description for the graded Mesh](gradedMesh/blockMesh.png)
    
