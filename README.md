@@ -357,3 +357,19 @@ Increasing U to 0.5 m/s and making the outlet a free boundary (**zeroGradient** 
 get the following results (compare the stability of linear vs. upwind):
 
 ![Upwind scheme is more stable](divResults/U0.5.gif)
+
+### Calculations Efficiency!
+
+You may have noticed that, **in our manual solution method**, we were focused on "cells".
+To get equation coefficients in cell `i` (a,b,c in 
+![algebraic_equation](https://latex.codecogs.com/gif.latex?a\phi_{i-1}&space;&plus;&space;b\phi_i&space;&plus;&space;c\phi_{i&plus;1})),
+we had to calculate the gradient at **shared faces**. 
+
+This is not efficient, as it requires the calculation of 
+the gradient at internal faces __twice__. We should have calculated gradients at all internal faces first; 
+then attempt to use them in the equations.
+
+OpenFOAM does things in this way, and it keeps a list of cells associated to a face (as neighbours and owners)
+to figure out the normal vector direction as it's important for gradient calculation.
+
+I recommend going through the manual solution again with this idea in mind.
