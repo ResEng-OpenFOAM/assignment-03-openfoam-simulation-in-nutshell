@@ -362,7 +362,7 @@ get the following results (compare the stability of linear vs. upwind):
 
 You may have noticed that, **in our manual solution method**, we were focused on "cells".
 To get equation coefficients in cell `i` (a,b,c in 
-![algebraic_equation](https://latex.codecogs.com/gif.latex?a\phi_{i-1}&space;&plus;&space;b\phi_i&space;&plus;&space;c\phi_{i&plus;1})),
+![algebraic_equation](https://latex.codecogs.com/gif.latex?a%5Cphi_%7Bi-1%7D%20&plus;%20b%5Cphi_i%20&plus;%20c%5Cphi_%7Bi&plus;1%7D)),
 we had to calculate the gradient at **shared faces**. 
 
 This is not efficient, as it requires the calculation of 
